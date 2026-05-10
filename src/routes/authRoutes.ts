@@ -6,8 +6,9 @@ import {
   updateUser,
   deleteUser,
   updatePassword,
+  addSupport,
 } from "../controllers/authController";
-import protect from "../middleware/authMiddleware";
+import protect, { requireRole } from "../middleware/authMiddleware";
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const router = Router();
 router.post("/register", register);
 router.post("/login", login);
 router.post("/logout", logout);
+router.post("/support", protect, requireRole("admin"), addSupport);
 
 
 router.put("/user/:id/password", protect, updatePassword);

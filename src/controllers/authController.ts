@@ -28,7 +28,7 @@ const isValidEmail = (email: string): boolean => {
 
 
 export const register = async (req: Request, res: Response): Promise<void> => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   if (!name || !email || !password) {
     res.status(400).json({ message: "Please provide name, email, and password." });
@@ -46,15 +46,13 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   }
 
   try {
-    
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       res.status(409).json({ message: "A user with this email already exists." });
       return;
     }
 
-    
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({ name, email, password, role: "customer" });
 
     const token = generateToken(user._id.toString(), user.role);
     setTokenCookie(res, token);
@@ -63,6 +61,45 @@ export const register = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error("Register error:", error);
     res.status(500).json({ message: "Server error during registration." });
+  }
+};
+
+
+
+export const addSupport = async (req: AuthRequest, res: Response): Promise<void> => {
+  const { name, email, password } = req.body;
+
+  if (!name || !email || !password) {
+    res.status(400).json({ message: "Please provide name, email, and password." });
+    return;
+  }
+
+  if (!isValidEmail(email)) {
+    res.status(400).json({ message: "Please provide a valid email address." });
+    return;
+  }
+
+  if (password.length < 6) {
+    res.status(400).json({ message: "Password must be at least 6 characters." });
+    return;
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({ message: "A user with this email already exists." });
+      return;
+    }
+
+    const user = await User.create({ name, email, password, role: "support" });
+
+    res.status(201).json({
+      message: "Support user created successfully.",
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+    });
+  } catch (error) {
+    console.error("Add support error:", error);
+    res.status(500).json({ message: "Server error while creating support user." });
   }
 };
 

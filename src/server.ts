@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import connectDB from "./config/db";
+import seedAdmin from "./config/seed";
 import authRoutes from "./routes/authRoutes";
 
 dotenv.config();
@@ -10,7 +11,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-connectDB();
+connectDB().then(() => seedAdmin());
 
 app.use(express.json());
 app.use(cookieParser());

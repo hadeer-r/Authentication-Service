@@ -27,12 +27,21 @@ const protect = (req: AuthRequest, res: Response, next: NextFunction): void => {
     const secret = process.env.JWT_SECRET as string;
     const decoded = jwt.verify(token, secret) as JwtPayload;
 
-
     req.user = { id: decoded.id, role: decoded.role };
     next();
   } catch (error) {
     res.status(401).json({ message: "Not authorized. Token is invalid." });
   }
 };
+
+export const requireRole =
+  (...roles: string[]) =>
+  (req: AuthRequest, res: Response, next: NextFunction): void => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      res.status(403).json({ message: "Access denied. Insufficient permissions." });
+      return;
+    }
+    next();
+  };
 
 export default protect;
